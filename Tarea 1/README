@@ -1,0 +1,19 @@
+El archivo .py contiene el código implementado para una mochila 5x5x5 con 12 fichas, 6 con tamaño 1x2x4 y 6 con tamaño 2x2x3. 
+La lista I contiene la cantidad de fichas las cuales están ordenadas por tipo. Así pues, para cada tipo de ficha existen todas las combinaciones 
+para sus diferentes orientaciones.
+W en este caso es el largo (de izquierda a derecha), H es el alto (de abajo a arriba) y D es la profundidad (de atrás hacia delante). En consecuencia, 
+el origen y punto de referencia de las fichas está en la esquina inferior posterior izquierda.
+Tales valores se pueden modificar a gusto, así como el número de fichas y su tamaño.
+La varible s_i indica si la ficha i está en la mochila.
+Las variables x_i,y_i,z_i indican las coordenadas de la ficha teniendo en cuenta lo dicho anteriormente.
+La variable o_ip indica si la ficha i lleva la posición p de las 6 posibles orientaciones. Por tanto, si la ficha i está en la mochila (s_i=1), entonces
+o_ip debe tomar valor de 1 para alguna de las orientaciones posibles.
+La big M está establecida en 10 para el problema de 5x5x5, pero a mayor dimensión esta debe aumentar también.
+La función objetivo trata de maximizar el volumen de las fichas que entran en la mochila.
+La restricción (1) [Línea 44] establece una única orientación.
+Las restricciones (2) [Líneas 49-52] establecen la contenencia de la mochila.
+Las expresiones w_i,h_i,d_i son usadas para saber el largo, alto y ancho de la ficha según la orientación de o_ip.
+En la línea 66 se crea la variable b[i,j,d]. Ahora bien, se crean 6 variables b esto para cada tipo de posición de i respecto a j. Es por ello que la 
+restricción (3) establece que al menos la suma de estas debe ser mayor o igual a 1. Posteriormente en las restricciones (4) se ve como si las fichas i y j están 
+en la mochila (al mismo tiempo) la variable b debe sumar por lo menos 1, pues recordando esta indica la posición de i respecto a j, luego i y j deben estar en la 
+mochila.
