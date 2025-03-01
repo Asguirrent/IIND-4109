@@ -3,7 +3,10 @@ Configurar rutas:
 Modificar la variable file_path en el código para acceder a las instancias e Bruce Golden .dat:
   Bruce Golden = r"ruta/a/tu/carpeta/gdb/gdb"  
 Se ha de modificar las lineas 61 y 300 del código.
-
+IMPORTANTE
+  Para la línea 61 se debe poner al final del path la instancia a correr "gdb\gdb2.dat" mientras que en la línea 300 se espera que el final del path termine de
+  la siguiente forma "...\gdb\gdb". Esto pues el primer gdb es el nombre de la carpte y la función run_all_instances se encarga de concatenar al path
+  cada nombre del archivo de forma secuencial.
 Funciones clave:
 transform_data(file_path):
 Lee archivos .dat y extrae nodos, arcos requeridos/no requeridos, depósito y capacidad.
