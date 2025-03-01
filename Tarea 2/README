@@ -1,0 +1,110 @@
+MODO DE USO
+Configurar rutas:
+Modificar la variable file_path en el código para acceder a las instancias e Bruce Golden .dat:
+  Bruce Golden = r"ruta/a/tu/carpeta/gdb/gdb"  
+Se ha de modificar las lineas 61 y 300 del código.
+
+Funciones clave:
+transform_data(file_path):
+Lee archivos .dat y extrae nodos, arcos requeridos/no requeridos, depósito y capacidad.
+  Input: Ruta del archivo .dat.
+  Output: Diccionario estructurado con datos del problema.
+
+create_graph(data):
+Construye un grafo no dirigido con networkx.
+  Input: Datos de transform_data.
+  Output: Objeto networkx.Graph.
+
+carp_heuristic(data, graph):
+Heurística constructiva con selección por ratio demanda/costo. La selección por ratio se hace calculando todos los ratio de los arcos no servidos y eligiendo 
+el mejor. Ya con ello, se recurre a Dijkstra para calcular el camino de menor distancia (sin servir) al nodo final e inicial del arco con mejor ratio, entre 
+tales caminos se elige el de menor costo y se añade a la ruta iterativamente. Cuando no es factible añadir por capacidad se crea otra ruta.
+La heurística termina cuando todos los arcos estén servidos.
+    Heurística CARP:
+    1.	Cargar datos (ordenados por costo), pre-generar un grafo y pre-correr Dijkstra
+    2.	Crear unserved con todas las aristas del archivo (previamente cargado y transformado a un grafo)
+    3.	Inicializar routes como una lista vacía
+    4.	Mientras existan aristas en unserved
+      a.	current_load se inicializa en 0
+      b.	total_cost se inicializa en 0
+      c.	current_pos comienza en el depot
+      d.	path_log se inicializa como vacío 
+      e.	Mientras la ruta sea factible en términos de carga (True)
+        i.	candidates se inicializa como vacío
+        ii.	Para cada arista en unserved
+          1.	Si la capacidad, al añadir la arista, se excede NO considerar a la arista en candidates
+          2.	Elegir el camino para recorrer la arista “min(Dijkstra(current_pos, nodo inicial del arco), Dijkstra(current_pos, nodo final del arco))”
+          3.	Criterio Greedy: relación demanda/costo “demanda de la arista/(camino a recorrer + costo)”
+          4.	Agregar el candidato a candidates
+        iii.	Si no hay candidates parar (ir a la línea f)
+        iv.	Ordenar candidates según el Criterio Greedy y elegir el primer candidato por mayor relación demanda/costo
+        v.	Para llegar a dicho candidato se valdrán de caminos deadhead para alcanzar el nodo más cercano de dicha arista dados por Dijkstra, total_cost se actualiza, path_log se actualiza con los deadhead´s y         current_pos se actualiza
+        vi.	path_log se actualiza con el arco del inicio de la arista hasta el final de la misma arista, total_cost se actualiza, current_load  se actualiza con el la demanda del arco servido y current_pos se actualiza
+        vii.	Se remueve el arco de unserved
+        viii.	Volver a la línea e
+      f.	Volver al depósito con Dijkstra
+      g.	Añadir path_log a routes
+  Input: Datos cargados con transform_data y grafo creado con create_graph.
+  Output:
+    routes: Lista de rutas con detalles de movimientos.
+    reporte_final: Diccionario con uso de cada arco.
+
+format_routes(routes, depot_node):
+Convierte rutas a texto.
+  Ruta 1: 1-servicio-12-deadhead-3-servicio-2...-deadhead-1
+  Costo ruta 1: 410
+
+run_all_instances(base_path):
+Procesa todas las instancias gdb1.dat a gdb23.dat.
+  Output: Diccionario con resultados por instancia (tiempo, costo total, rutas).
+
+A continuación se presenta las soluciones a cada una de las instancias.
+--- gdb1 ---                     --- gdb2 ---                     --- gdb3 ---                     --- gdb4 ---                     --- gdb5 ---
+Time: 0.0121s                    Time: 0.0175s                    Time: 0.012s                     Time: 0.009s                     Time: 0.023s
+Routes: 5                        Routes: 6                        Routes: 5                        Routes: 4                        Routes: 6        
+Total Cost: 396                  Total Cost: 467                  Total Cost: 371                  Total Cost: 357                  Total Cost: 479
+
+--- gdb6 ---                     --- gdb7 ---                     --- gdb8 ---                     --- gdb9 ---                     --- gdb10 ---
+Time: 0.012s                     Time: 0.012s                    Time: 0.0831s                     Time: 0.1076s                    Time: 0.019s
+Routes: 5                        Routes: 5                        Routes: 10                       Routes: 10                       Routes: 10     
+Total Cost: 332                  Total Cost: 393                  Total Cost: 543                  Total Cost: 455                  Total Cost: 332
+
+--- gdb11 ---                    --- gdb12 ---                    --- gdb13 ---                    --- gdb14 ---                     --- gdb15 ---
+Time: 0.0875s                    Time: 0.018s                     Time: 0.0475s                    Time: 0.022s                      Time: 0.013s
+Routes: 7                        Routes: 7                        Routes: 7                        Routes: 5                         Routes: 4     
+Total Cost: 544                  Total Cost: 797                  Total Cost: 712                  Total Cost: 134                   Total Cost: 66
+
+--- gdb16 ---                    --- gdb17 ---                    --- gdb18 ---                    --- gdb19 ---                     --- gdb20 ---
+Time: 0.0255s                    Time: 0.023s                     Time: 0.039s                     Time: 0.004s                      Time: 0.018s
+Routes: 5                        Routes: 5                        Routes: 5                        Routes: 3                         Routes: 4     
+Total Cost: 139                  Total Cost: 95                   Total Cost: 197                  Total Cost: 71                    Total Cost: 175
+
+--- gdb21 ---                    --- gdb22 ---                    --- gdb23 ---                      
+Time: 0.0263s                    Time: 0.063s                     Time: 0.1196s   
+Routes: 6                        Routes: 8                        Routes: 10                      
+Total Cost: 199                  Total Cost: 230                  Total Cost: 268                 
+
+Resumen final:
+gdb1: 5 rutas, Costo: 396, Tiempo: 0.0121s
+gdb2: 6 rutas, Costo: 467, Tiempo: 0.0175s
+gdb3: 5 rutas, Costo: 371, Tiempo: 0.012s
+gdb4: 4 rutas, Costo: 357, Tiempo: 0.009s
+gdb5: 6 rutas, Costo: 479, Tiempo: 0.023s
+gdb6: 5 rutas, Costo: 332, Tiempo: 0.012s
+gdb7: 5 rutas, Costo: 393, Tiempo: 0.012s
+gdb8: 10 rutas, Costo: 543, Tiempo: 0.0831s
+gdb9: 10 rutas, Costo: 455, Tiempo: 0.1076s
+gdb10: 4 rutas, Costo: 332, Tiempo: 0.019s
+gdb11: 5 rutas, Costo: 544, Tiempo: 0.0875s
+gdb12: 7 rutas, Costo: 797, Tiempo: 0.018s
+gdb13: 7 rutas, Costo: 712, Tiempo: 0.0475s
+gdb14: 5 rutas, Costo: 134, Tiempo: 0.022s
+gdb15: 4 rutas, Costo: 66, Tiempo: 0.013s
+gdb16: 5 rutas, Costo: 139, Tiempo: 0.0255s
+gdb17: 5 rutas, Costo: 95, Tiempo: 0.023s
+gdb18: 5 rutas, Costo: 197, Tiempo: 0.039s
+gdb19: 3 rutas, Costo: 71, Tiempo: 0.004s
+gdb20: 4 rutas, Costo: 175, Tiempo: 0.018s
+gdb21: 6 rutas, Costo: 199, Tiempo: 0.0263s
+gdb22: 8 rutas, Costo: 230, Tiempo: 0.063s
+gdb23: 10 rutas, Costo: 268, Tiempo: 0.1196s
