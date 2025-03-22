@@ -1,1 +1,65 @@
-bruh
+MODO DE USO
+
+Configurar intancias:
+Ir a la línea 274 de código y colocar el pack de semillas a correr. Para los packs entre seed_20x5 y seed_50x20, los tiempos de ejecución son menores a 7 minutos.
+Las semillas de seed_100x5 hasta seed_500x20 pueden tardar entre 10 minutos y más de 1 hora, a mayor número mayor tiempo.
+  Línea 274: for seed in SEMILLA A COLOCAR:
+  Ej: for seed in seed_20x5:
+Luego, ir a la línea 276 de código y cambiar lo siguiente:
+  best_perm, cmax = tabu_search(convert_data(lcg(seed, PRODUCTO ENTRE #MÁQUINAS Y #TRABAJOS), #MAQUINAS, #TRABAJOS), tenure, max_iter)
+  Ej: best_perm, cmax = tabu_search(convert_data(lcg(seed, 100), 5, 20), tenure, max_iter)
+Al correr TODO el código se hará lo siguiente:
+  for seed in seed_20x5:
+      start_time = time.time()
+      best_perm, cmax = tabu_search(convert_data(lcg(seed, 100), 5, 20), tenure, max_iter)
+      end_time = time.time()
+      elapsed_time = end_time - start_time
+      print(f"Cmax: {cmax}, Time: {elapsed_time}")
+
+IMPORTANTE
+  Es fundamental calibrar lo anterior según el conjunto de semillas que se esté usando. 
+  Llegado el caso que solo se quiere correr una sola semilla solo se debe copiar las siguientes líneas de código y modificarla según lo dicho:
+    best_perm, cmax = tabu_search(convert_data(lcg(SEMILLA, PRODUCTO), MAQS, JOBS), tenure, max_iter)
+      print(f"Cmax: {cmax}")
+
+Funciones clave:
+compute_makespan(permutation, processing_times):
+Calcula el makespan según el orden de trabajos.
+  Input: Permutación de trabajos y tiempos de procesamiento de cada trabajo en cada máquina.
+  Output: Valor del makespan.
+
+constructive(processing_times):
+Contruye una primera permutación de trabajos.
+  Input: Tiempos de procesamiento de cada trabajo en cada máquina.
+  Output: Permutación de trabajos.
+
+lcg(seed, n):
+Crea los tiempo de procesamiento de cada trabajo en cada máquina.
+  Input: Semilla y número de tiempos de procesamiento a crear.
+  Output: Lista con todos los tiempos de procesamiento de cada trabajo en cada máquina.
+
+convert_data(results, n, m):
+Convierte la lista de tiempo a una lista de lista que recibe la función tabu_search(_,_)
+  Input: Semilla y número de tiempos de procesamiento a crear.
+  Output: Lista con todos los tiempos de procesamiento de cada trabajo en cada máquina.
+
+tabu_search(processing_times, tenure, max_iter):
+Metaheurística basada en memoria adaptativa. Crea una solución inicial generada con el heurístico NEH, que prioriza trabajos con mayor tiempo total. Crea 
+vecindarios de 4 operadores: inserción, swap adyacente (1,1), swap no adyacente (i, i+2+), y k-shift (desplazamiento múltiple). En el código almacena 
+movimientos recientes como tuplas (tipo_movimiento, parámetros). Y tiene un criterio de aspiración que acepta soluciones tabú si mejoran el C_max
+    	Generar una solución inicial mediante una heurística constructiva en este caso se intentó hacer una especie de NEH, es decir, ordenar trabajos por tiempo total decreciente e insertarlos en la posición que minimiza el makespan.
+    	Se comienza a iterar sobre las iteraciones máximas.
+    	Se exploran vecindades de soluciones, previamente creadas mediante intercambios de trabajos en la secuencia. Los vecindarios utilizados fueron:
+      o	Inserción de trabajos.
+      o	Swap(1,1) intercambia un trabajo con su vecino inmediato.
+      o	Swap de vecinos/trabajos no adyacentes.
+      o	K-shift mueve un trabajo hasta k posiciones hacia adelante o atrás.  
+    	Mantener una lista tabú de movimientos recientemente realizados para evitar volver a soluciones previas.
+    	Sin embargo, se aplica un criterio de aspiración que permite aceptar soluciones tabú sí y solo sí mejoran el óptimo conocido.
+    	Se acaba la búsqueda tabú cuando se llega al límite de iteraciones.
+
+  Input: Tiempos de procesamiento de cada trabajo en cada máquina, tamañao de la lsta tabú y máximo de iteraciones.
+  Output:
+    best_solution: Mejor permutación de trabajos encontrada.
+    best_cmax: Mejor makespan encontrado.
+
